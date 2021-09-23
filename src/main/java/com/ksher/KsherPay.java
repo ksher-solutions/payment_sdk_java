@@ -118,12 +118,7 @@ public class KsherPay {
         // finally : transfer sign result from binary to upper hex string
         return byte2hex(bytes);
     }
-    /**
-     * making signature from concat url and all pairs of data
-     * @param  url api endpoint for example /api/v1/app/orders, for webhook: www.yoururl.com/webhookendpoint
-     * @param  params a combination of parameters and body payload sorted alphabetically
-     * @return if the signature matched return true, otherwise false.
-     */
+
     public boolean checkSignature(String url, Map<String, String> params) throws Exception {
 
         String signature = (params.remove("signature")).toUpperCase();
@@ -138,64 +133,134 @@ public class KsherPay {
 
     }
 
+    public  String makeParamString(HashMap<String, String> data){
+        // first: sort all text parameters
+        String[] keys = data.keySet().toArray(new String[0]);
+        Arrays.sort(keys);
+        StringBuilder dataStrB = new StringBuilder();
+        for(String key: keys){
+            if(dataStrB.length() == 0){
+                dataStrB.append("?");
+            }else{
+                dataStrB.append("&");
+            }
+            dataStrB.append(key+"="+data.get(key));
+        }
+        return dataStrB.toString();
 
-    private HashMap<String, String> _request(String url, String method, HashMap<String, String> data) throws Exception {
+    }
+    private HashMap<String, String> _request(String endpoint, String method, HashMap<String, String> data) throws Exception {
+
+        //prep to post body data
+        String url;
+        Gson gson = new Gson();
+        data.put("timestamp", timeStampFormat.format(new java.util.Date()));
+        String sign = _makeSignature(endpoint, data);
+        data.put("signature", sign);
+
+        if (method.equals("GET") || method.equals("DELETE")){
+            // for GET and DELETE we put the data into parameter
+            url = this.gateway_domain + endpoint + this.makeParamString(data);
+        }else
+        {
+            url = this.gateway_domain + endpoint;
+        }
         URL obj = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
         connection.setRequestMethod(method);
-        connection.setRequestProperty("Content-Type", "application/json");
 
-        //prep to post body data
-        Gson gson = new Gson();
-        data.put("timestamp", timeStampFormat.format(new java.util.Date()));
-        String sign = _makeSignature(apiEndpoint, data);
-        data.put("signature", sign);
-        String jsonStr = gson.toJson(data);
-        System.out.println("jsonStr: " + jsonStr);
-        connection.setDoOutput(true);
-        OutputStream os = connection.getOutputStream();
-        os.write(jsonStr.getBytes());
-        os.flush();
-        os.close();
+
+        if(method.equals("POST") || method.equals("PUT")){
+            // for POST and PUT we put the data into request body
+            connection.setRequestProperty("Content-Type", "application/json");
+            String jsonStr = gson.toJson(data);
+            connection.setDoOutput(true);
+            OutputStream os = connection.getOutputStream();
+            os.write(jsonStr.getBytes());
+            os.flush();
+            os.close();
+        }
+
+
 
         // process the response
+        BufferedReader in;
         int responseCode = connection.getResponseCode();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                connection.getInputStream()));
+        // see which buffer to be read from.
+        if (responseCode == HttpURLConnection.HTTP_OK){
+            in = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+
+        } else {
+            in = new BufferedReader(new InputStreamReader(
+                    connection.getErrorStream()));
+        }
+
+        // read data from the buffer
         String inputLine;
-        StringBuilder response = new StringBuilder();
+        StringBuffer response = new StringBuffer();
 
         while ((inputLine = in .readLine()) != null) {
             response.append(inputLine);
         } in .close();
 
+        // covert json into hashmap
         String respStr = response.toString();
         Type type = new TypeToken<HashMap<String, String>>(){}.getType();
         HashMap<String, String> respData = gson.fromJson(respStr, type);
-        boolean checkResult = this.checkSignature(this.apiEndpoint, respData);
-        if(!checkResult ){
-            HashMap<String, String> failData = new HashMap<>();
-            failData.put("force_clear","false");
-            failData.put("cleared","false");
-            failData.put("error_code","VERIFY_KSHER_SIGN_FAIL");
-            failData.put("error_message","verify signature failed");
-            failData.put("locked","false");
 
-            return failData;
+        // for success resp check signature
+        if (responseCode == HttpURLConnection.HTTP_OK){
+            boolean checkResult = this.checkSignature(endpoint, respData);
+            if(!checkResult ){
+                HashMap<String, String> failData = new HashMap<>();
+                failData.put("force_clear","false");
+                failData.put("cleared","false");
+                failData.put("error_code","VERIFY_KSHER_SIGN_FAIL");
+                failData.put("error_message","verify signature failed");
+                failData.put("locked","false");
 
+                return failData;
+
+            }
+            return respData;
         }
 
+        //otherwise send back error message from request response
+        HashMap<String, String> failData = new HashMap<>();
+        failData.put("error_code",respData.get("code"));
+        failData.put("error_message",respData.get("description"));
 
-        return respData;
-
-
-
-
+        return failData;
+    }
+    public HashMap<String, String> query(String orderId) throws Exception{
+        HashMap<String, String> data = new HashMap<>();
+        final String endpointUrl = this.apiEndpoint + "/" + orderId;
+        return this._request(endpointUrl, "GET", data);
+    }
+    public HashMap<String, String> cancle(String orderId) throws Exception{
+        HashMap<String, String> data = new HashMap<>();
+        final String endpointUrl = this.apiEndpoint + "/" + orderId;
+        return this._request(endpointUrl, "DELETE", data);
+    }
+    /**
+     * making a refund to a specified order
+     * @param  orderId the order that you want to make a refund
+     * @param  refundId a new unique id to refer to this refund transaction
+     * @param  refundAmount string of an amount you want to be refund in cent unit eg 1 baht = "100"
+     * @return if the signature matched return true, otherwise false.
+     */
+    public HashMap<String, String> refund(String orderId, String refundId, String refundAmount) throws Exception{
+        HashMap<String, String> data = new HashMap<>();
+        data.put("refund_amount",refundAmount);
+        data.put("refund_order_id",refundId);
+        final String endpointUrl = this.apiEndpoint + "/" + orderId;
+        return this._request(endpointUrl, "PUT", data);
     }
 
     public HashMap<String, String> create( HashMap<String, String> data) throws Exception{
-        final String endpointUrl = this.gateway_domain + this.apiEndpoint;
+        final String endpointUrl = this.apiEndpoint;
         return this._request(endpointUrl, "POST", data);
     }
 }
