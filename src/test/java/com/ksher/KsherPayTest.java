@@ -21,8 +21,11 @@ public class KsherPayTest {
     @Test
     public void testCreateOrderFail() throws Exception {
         Map<String, String> env = System.getenv();
+        System.out.println("============ Testing testCreateOrderFail ===============");
         final String gateway_domain = env.get("GATEWAY_DOMAIN");
         final String token = env.get("TOKEN");
+        System.out.println("GATEWAY_DOMAIN:"+gateway_domain);
+
         //  try to put not all the required field and the result should be fail
         HashMap<String, String> data = new HashMap<>();
         Date date = Calendar.getInstance().getTime();
