@@ -10,8 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.Map;
 
 
@@ -21,8 +19,11 @@ public class KsherPayTest {
     @Test
     public void testCreateOrderFail() throws Exception {
         Map<String, String> env = System.getenv();
+        System.out.println("============ Testing testCreateOrderFail ===============");
         final String gateway_domain = env.get("GATEWAY_DOMAIN");
         final String token = env.get("TOKEN");
+        System.out.println("GATEWAY_DOMAIN:"+gateway_domain);
+
         //  try to put not all the required field and the result should be fail
         HashMap<String, String> data = new HashMap<>();
         Date date = Calendar.getInstance().getTime();
@@ -60,8 +61,6 @@ public class KsherPayTest {
             resp = ksherPay.query(orderId);
             System.out.println("query order's resp : " + resp);
             Assert.assertEquals(resp.get("error_code"),"PENDING");
-            Desktop desk = Desktop.getDesktop();
-            desk.browse(new URI(resp.get("reference")));
         }
 
     }
