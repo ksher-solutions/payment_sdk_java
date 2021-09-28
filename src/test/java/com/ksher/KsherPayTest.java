@@ -12,15 +12,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.awt.Desktop;
 import java.net.URI;
+import java.util.Map;
 
 
 public class KsherPayTest {
-    public final String gateway_domain = "https://sxxxxx.vip.ksher.net";
-    public final String token = "token123";
+
 
     @Test
     public void testCreateOrderFail() throws Exception {
-    //  try to put not all the required field and the result should be fail
+        Map<String, String> env = System.getenv();
+        final String gateway_domain = env.get("GATEWAY_DOMAIN");
+        final String token = env.get("TOKEN");
+        //  try to put not all the required field and the result should be fail
         HashMap<String, String> data = new HashMap<>();
         Date date = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
@@ -36,7 +39,9 @@ public class KsherPayTest {
 
     @Test
     public void testCreateOrderSuccess() throws Exception {
-
+        Map<String, String> env = System.getenv();
+        final String gateway_domain = env.get("GATEWAY_DOMAIN");
+        final String token = env.get("TOKEN");
         HashMap<String, String> data = new HashMap<>();
         Date date = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddhhmmss");

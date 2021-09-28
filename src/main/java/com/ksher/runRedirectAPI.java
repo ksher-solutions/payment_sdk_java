@@ -10,8 +10,8 @@ public class runRedirectAPI {
 
     public static void main(String[] args) throws Exception {
 	// write your code here
-        final String gateway_domain = "https://sxxxxx.vip.ksher.net";
-        final String token = "token123";
+        final String gateway_domain = "https://sandboxbkk.vip.ksher.net";
+        final String token = "186d6c953c90f39c2973e6dd2e110d4057194996ef08fb4b3338180517b509c7";
 
         HashMap<String, String> data = new HashMap<>();
         Date date = Calendar.getInstance().getTime();
