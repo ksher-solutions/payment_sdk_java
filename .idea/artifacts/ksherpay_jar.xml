@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ksherpay:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ksherpay_jar</output-path>
+    <root id="archive" name="ksherpay.jar">
+      <element id="module-output" name="ksherpay" />
+    </root>
+  </artifact>
+</component>
