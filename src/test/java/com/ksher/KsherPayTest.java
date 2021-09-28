@@ -10,8 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.Map;
 
 
@@ -63,8 +61,6 @@ public class KsherPayTest {
             resp = ksherPay.query(orderId);
             System.out.println("query order's resp : " + resp);
             Assert.assertEquals(resp.get("error_code"),"PENDING");
-            Desktop desk = Desktop.getDesktop();
-            desk.browse(new URI(resp.get("reference")));
         }
 
     }
