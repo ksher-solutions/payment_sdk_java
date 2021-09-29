@@ -6,7 +6,7 @@
 
     <groupId>io.github.ksher-solutions</groupId>
     <artifactId>ksherpay</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <build>
         <plugins>
             <plugin>
@@ -48,7 +48,7 @@
         <repository>
             <id>ossrh</id>
             <name>Central Repository OSSRH</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
