@@ -21,15 +21,12 @@ The Payment SDK for accessing *.vip.ksher.net
 
 ## How to Install
 
-please add this in your project pom.xml
+please see the dependency tag that need to be add in your project's pom.xml file [here](https://github.com/ksher-solutions/payment_sdk_java/packages/1016715)
 
-```xml
-<dependency>
-    <groupId>io.github.ksher-solutions</groupId>
-    <artifactId>ksherpay</artifactId>
-    <version>1.0.1</version>
-</dependency>
-```
+### package cannot be found
+if after adding the tag and you got error saying it cannot find the package,
+you probably didn't config your project settings.xml to check github package.
+please follow this guide [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token) on how to update settings.xml
 
 
 ## How to Use
