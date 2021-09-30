@@ -157,6 +157,7 @@ public class KsherPay {
         data.put("timestamp", timeStampFormat.format(new java.util.Date()));
         String sign = _makeSignature(endpoint, data);
         data.put("signature", sign);
+        HashMap<String, String> respData;
 
         if (method.equals("GET") || method.equals("DELETE")){
             // for GET and DELETE we put the data into parameter
@@ -208,7 +209,19 @@ public class KsherPay {
         // covert json into hashmap
         String respStr = response.toString();
         Type type = new TypeToken<HashMap<String, String>>(){}.getType();
-        HashMap<String, String> respData = gson.fromJson(respStr, type);
+
+        try{
+            respData = gson.fromJson(respStr, type);
+        } catch (Exception e){
+            HashMap<String, String> failData = new HashMap<>();
+            failData.put("force_clear","false");
+            failData.put("cleared","false");
+            failData.put("error_code","INVALID_RESP");
+            failData.put("error_message",respStr);
+            failData.put("locked","false");
+            return failData;
+        }
+
 
         // for success resp check signature
         if (responseCode == HttpURLConnection.HTTP_OK){
