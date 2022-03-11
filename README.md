@@ -1,4 +1,4 @@
-# Payment_sdk_python
+# Payment sdk Java
 
 This is java sdk for integrating your java application with Ksher Payment Gateway. 
 Please refer to our official api document [here](https://doc.vip.ksher.net)
