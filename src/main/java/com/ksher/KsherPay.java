@@ -22,7 +22,11 @@ public class KsherPay {
 
     public enum ApiType{
         REDIRECT,
-        CSCANB
+        CSCANB,
+        BSCANC,
+        MINIAPP,
+        APP,
+        FINANCE
     }
     private final String gateway_domain;
     private final String token;
@@ -46,6 +50,18 @@ public class KsherPay {
                 break;
             case CSCANB:
                 apiEndpoint = "/api/v1/cscanb/orders";
+                break;
+            case BSCANC:
+                apiEndpoint = "/api/v1/bscanc/orders";
+                break;
+            case MINIAPP:
+                apiEndpoint = "/api/v1/miniapp/orders";
+                break;
+            case APP:
+                apiEndpoint = "/api/v1/app/orders";
+                break;
+            case FINANCE:
+                apiEndpoint = "/api/v1/finance/settlements";
                 break;
             default:
                 apiEndpoint = "/api/v1/redirect/orders";
@@ -248,9 +264,12 @@ public class KsherPay {
         return failData;
     }
     public HashMap<String, String> query(String orderId) throws Exception{
-        HashMap<String, String> data = new HashMap<>();
+        HashMap<String, String> data = new HashMap();
+        return query(orderId,data);
+    }
+    public HashMap<String, String> query(String orderId, HashMap<String, String> params) throws Exception{
         final String endpointUrl = this.apiEndpoint + "/" + orderId;
-        return this._request(endpointUrl, "GET", data);
+        return this._request(endpointUrl, "GET", params);
     }
     public HashMap<String, String> cancle(String orderId) throws Exception{
         HashMap<String, String> data = new HashMap<>();
@@ -264,16 +283,39 @@ public class KsherPay {
      * @param  refundAmount string of an amount you want to be refund in cent unit eg 1 baht = "100"
      * @return if the signature matched return true, otherwise false.
      */
+    public HashMap<String, String> refund(String orderId, HashMap<String, String> data) throws Exception{
+        final String endpointUrl = this.apiEndpoint + "/" + orderId;
+        return this._request(endpointUrl, "PUT", data);
+    }
     public HashMap<String, String> refund(String orderId, String refundId, String refundAmount) throws Exception{
         HashMap<String, String> data = new HashMap<>();
         data.put("refund_amount",refundAmount);
         data.put("refund_order_id",refundId);
-        final String endpointUrl = this.apiEndpoint + "/" + orderId;
-        return this._request(endpointUrl, "PUT", data);
+        return refund(orderId,data);
     }
 
     public HashMap<String, String> create( HashMap<String, String> data) throws Exception{
         final String endpointUrl = this.apiEndpoint;
         return this._request(endpointUrl, "POST", data);
+    }
+
+    public HashMap<String, String> channels(HashMap<String, String> params) throws Exception{
+        final String endpointUrl = this.apiEndpoint + "/channels";
+        return this._request(endpointUrl, "GET", params);
+    }
+
+    public HashMap<String, String> order(String yyyymmdd, HashMap<String, String> params) throws Exception{
+        final String endpointUrl = this.apiEndpoint + "/order/" + yyyymmdd;
+        return this._request(endpointUrl, "GET", params);
+    }
+
+    public HashMap<String, String> settlements(String yyyymmdd, HashMap<String, String> params) throws Exception{
+        final String endpointUrl = this.apiEndpoint + "/" + yyyymmdd;
+        return this._request(endpointUrl, "GET", params);
+    }
+
+    public HashMap<String, String> settlement_order(HashMap<String, String> params) throws Exception{
+        final String endpointUrl = this.apiEndpoint + "/settlement_order";
+        return this._request(endpointUrl, "GET", params);
     }
 }
