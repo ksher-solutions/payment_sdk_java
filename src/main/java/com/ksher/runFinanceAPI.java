@@ -18,8 +18,8 @@ public class runFinanceAPI {
     private static String put;
     public static void main(String[] args) throws Exception {
 	// write your code here
-        final String gateway_domain = "https://sxxxxx.vip.ksher.net";
-        final String token = "token123";
+        final String gateway_domain = "https://sandboxdoc.vip.ksher.net";
+        final String token = "your token";
 
         KsherPay ksherPay = new KsherPay(gateway_domain, token, KsherPay.ApiType.FINANCE);
 
